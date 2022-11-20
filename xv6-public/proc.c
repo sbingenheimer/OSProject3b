@@ -7,6 +7,9 @@
 #include "proc.h"
 #include "spinlock.h"
 
+
+
+
 struct {
   struct spinlock lock;
   struct proc proc[NPROC];
@@ -548,18 +551,19 @@ int clone(void(*fcn)(void *, void *), void *arg1, void *arg2, void *stack) {
   np->parent = curproc;
   *np->tf = *curproc->tf;
   np->pgdir = curproc->pgdir;
+  np->tstack = stack;
 
   //Inserting both arguments and dummy return value into stack
-  void * temparg1, *temparg2, *tempret;
+  void * insarg1;
+  void * insarg2;
+  void * insret;
 
-  tempret = stack + PGSIZE - 3 * sizeof(void*);
-  * (uint*) tempret = 0xffffffff;
-
-  temparg1 = stack + PGSIZE - 2 * sizeof(void*);
-  * (uint*) temparg1 = (uint) arg1;
-
-  temparg2 = stack + PGSIZE - 1 * sizeof(void*);
-  * (uint*) temparg2 = (uint) arg2;
+  insret = stack + PGSIZE - 3 * sizeof(void*);
+  * (uint*) insret = 0xffffffff;
+  insarg1 = stack + PGSIZE - 2 * sizeof(void*);
+  * (uint*) insarg1 = (uint) arg1;
+  insarg2 = stack + PGSIZE - 1 * sizeof(void*);
+  * (uint*) insarg2 = (uint) arg2;
 
 //setting up stack registers
 
@@ -611,6 +615,8 @@ int join(void **stack) {
         kfree(p->kstack);
         p->kstack = 0;
         freevm(p->pgdir);
+        stack = p->tstack;
+        p->tstack = 0;
         p->pid = 0;
         p->parent = 0;
         p->name[0] = 0;

@@ -42,7 +42,7 @@
 00000000 proc.c
 801037b0 allocproc
 8010a000 first.1
-80113c54 initproc
+80113d54 initproc
 80107b0c states.0
 00000000 sleeplock.c
 00000000 spinlock.c
@@ -55,7 +55,7 @@
 00000000 trap.c
 00000000 uart.c
 80105ed0 uartgetc
-801144c0 uart
+801145c0 uart
 00000000 vm.c
 80106ad0 deallocuvm.part.0
 80106b80 mappages
@@ -209,7 +209,7 @@
 80106893 vector209
 80106079 vector4
 801066bf vector170
-801144d0 stack
+801145d0 stack
 80106527 vector136
 801060ad vector10
 8010686f vector206
@@ -259,7 +259,7 @@
 801062fc vector77
 80101610 ialloc
 80106737 vector180
-801144c4 kpgdir
+801145c4 kpgdir
 80106887 vector208
 801029d0 cmostime
 80106040 uartintr
@@ -268,7 +268,7 @@
 80106707 vector176
 801067df vector194
 80106167 vector32
-801154d0 end
+801155d0 end
 8010681b vector199
 801064eb vector131
 80106a97 vector252
@@ -304,7 +304,7 @@
 80106194 vector37
 80106863 vector205
 80106653 vector161
-80113c80 tickslock
+80113d80 tickslock
 801035d0 pipewrite
 80104a30 strncpy
 801062c6 vector71
@@ -381,7 +381,7 @@
 801061e5 vector46
 8010650f vector134
 8010693b vector223
-80113cc0 idt
+80113dc0 idt
 801068ff vector218
 801038d0 pinit
 801070c0 deallocuvm
@@ -396,7 +396,7 @@
 801000d0 bread
 801064be vector127
 801036d0 piperead
-80113c60 ticks
+80113d60 ticks
 801067c7 vector192
 8010668f vector166
 80100a60 consoleinit
