@@ -3,6 +3,9 @@
 #include "fcntl.h"
 #include "user.h"
 #include "x86.h"
+#include "mmu.h"
+
+
 
 char*
 strcpy(char *s, const char *t)
@@ -103,4 +106,39 @@ memmove(void *vdst, const void *vsrc, int n)
   while(n-- > 0)
     *dst++ = *src++;
   return vdst;
+}
+
+int thread_create(void (*start_routine)(void *, void *), void *arg1, void *arg2){
+  void * stack = malloc(PGSIZE);
+  int toret = clone(start_routine, arg1, arg2, stack);
+
+  if (toret != -1){
+    return toret;
+  }else {
+    return -1;
+  }
+}
+
+int thread_join() {
+  void * stack;
+  int toret = join(&stack);
+  if (toret != -1){
+    return toret;
+  }
+  else{
+    return -1;
+  }
+}
+
+void lock_init(lock_t *lock){
+  lock->locked = 0;
+}
+
+void lock_acquire(lock_t *lock){
+ while(xchg(&lock->locked, 1) != 0)
+    ;
+}
+
+void lock_release(lock_t *lock){
+  xchg(&lock->locked, 0);
 }
