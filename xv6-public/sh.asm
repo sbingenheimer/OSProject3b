@@ -1998,26 +1998,39 @@ int thread_create(void (*start_routine)(void *, void *), void *arg1, void *arg2)
      e20:	55                   	push   %ebp
      e21:	89 e5                	mov    %esp,%ebp
      e23:	83 ec 14             	sub    $0x14,%esp
-  void * stack = malloc(PGSIZE);
+  //free space that will be check for page allignment and a stack pointer that will be 
+  //set after page alignment is confirmed
+  void * stackspace = malloc(PGSIZE);
      e26:	68 00 10 00 00       	push   $0x1000
      e2b:	e8 20 04 00 00       	call   1250 <malloc>
+  void * stack;
+
+  //setting up pagealignment
+  if (((uint)stackspace % PGSIZE) == 0){
+     e30:	83 c4 10             	add    $0x10,%esp
+     e33:	a9 ff 0f 00 00       	test   $0xfff,%eax
+     e38:	74 05                	je     e3f <thread_create+0x1f>
+    stack = stackspace;
+  }else{
+    stack = stackspace + (PGSIZE - ((uint)stackspace - PGSIZE));
+     e3a:	b8 00 20 00 00       	mov    $0x2000,%eax
+  }
+
+  //call clone
   int toret = clone(start_routine, arg1, arg2, stack);
-     e30:	50                   	push   %eax
-     e31:	ff 75 10             	push   0x10(%ebp)
-     e34:	ff 75 0c             	push   0xc(%ebp)
-     e37:	ff 75 08             	push   0x8(%ebp)
-     e3a:	e8 16 01 00 00       	call   f55 <clone>
+     e3f:	50                   	push   %eax
+     e40:	ff 75 10             	push   0x10(%ebp)
+     e43:	ff 75 0c             	push   0xc(%ebp)
+     e46:	ff 75 08             	push   0x8(%ebp)
+     e49:	e8 07 01 00 00       	call   f55 <clone>
   if (toret != -1){
     return toret;
   }else {
     return -1;
   }
 }
-     e3f:	c9                   	leave  
-     e40:	c3                   	ret    
-     e41:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi
-     e48:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi
-     e4f:	90                   	nop
+     e4e:	c9                   	leave  
+     e4f:	c3                   	ret    
 
 00000e50 <thread_join>:
 
@@ -2025,6 +2038,7 @@ int thread_join() {
      e50:	55                   	push   %ebp
      e51:	89 e5                	mov    %esp,%ebp
      e53:	83 ec 24             	sub    $0x24,%esp
+  //create a stack variable which will be set in join
   void * stack;
   int toret = join(&stack);
      e56:	8d 45 f4             	lea    -0xc(%ebp),%eax
@@ -2044,6 +2058,7 @@ int thread_join() {
 
 00000e70 <lock_init>:
 
+// Lock functions as seen in spinlock.c
 void lock_init(lock_t *lock){
      e70:	55                   	push   %ebp
      e71:	89 e5                	mov    %esp,%ebp

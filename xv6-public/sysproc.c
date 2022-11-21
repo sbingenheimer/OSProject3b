@@ -48,6 +48,7 @@ sys_sbrk(void)
   int addr;
   int n;
 
+
   if(argint(0, &n) < 0)
     return -1;
   addr = myproc()->sz;
@@ -93,31 +94,34 @@ sys_uptime(void)
 int 
 sys_clone(void)
 {
-int fnc;
-int arg1;
-int arg2;
-int stack;
 
-if (argint(0, &fnc) < 0){
+//getting all param for clone
+void(*fcn)(void *, void *);
+void* arg1;
+void* arg2;
+void* stack;
+
+if (argptr(0, (void*)&fcn, sizeof(fcn)) < 0){
   return -1;
 }
-if (argint(1, &arg1) < 0){
+if (argptr(1, (void*)&arg1, sizeof(arg1)) < 0){
   return -1;
 }
-if (argint(2, &arg2) < 0){
+if (argptr(2, (void*)&arg2, sizeof(arg2)) < 0){
   return -1;
 }
-if (argint(0, &stack) < 0){
+if (argptr(3, (void*)&stack, sizeof(stack)) < 0){
   return -1;
 }
 
-return clone((void*)fnc, (void*)arg1, (void*)arg2, (void*)stack);
+return clone((void*)fcn, (void*)arg1, (void*)arg2, (void*)stack);
   
 }
 
 int 
 sys_join(void)
 {
+//getting stack param for join
 void** stack;
 
 if (argptr(0, (void*)&stack, sizeof(stack)) < 0){
