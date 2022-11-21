@@ -109,7 +109,19 @@ memmove(void *vdst, const void *vsrc, int n)
 }
 
 int thread_create(void (*start_routine)(void *, void *), void *arg1, void *arg2){
-  void * stack = malloc(PGSIZE);
+  //free space that will be check for page allignment and a stack pointer that will be 
+  //set after page alignment is confirmed
+  void * stackspace = malloc(PGSIZE);
+  void * stack;
+
+  //setting up pagealignment
+  if (((uint)stackspace % PGSIZE) == 0){
+    stack = stackspace;
+  }else{
+    stack = stackspace + (PGSIZE - ((uint)stackspace - PGSIZE));
+  }
+
+  //call clone
   int toret = clone(start_routine, arg1, arg2, stack);
 
   if (toret != -1){
@@ -120,6 +132,7 @@ int thread_create(void (*start_routine)(void *, void *), void *arg1, void *arg2)
 }
 
 int thread_join() {
+  //create a stack variable which will be set in join
   void * stack;
   int toret = join(&stack);
   if (toret != -1){
@@ -130,6 +143,7 @@ int thread_join() {
   }
 }
 
+// Lock functions as seen in spinlock.c
 void lock_init(lock_t *lock){
   lock->locked = 0;
 }

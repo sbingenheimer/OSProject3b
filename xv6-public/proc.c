@@ -551,7 +551,7 @@ int clone(void(*fcn)(void *, void *), void *arg1, void *arg2, void *stack) {
   np->parent = curproc;
   *np->tf = *curproc->tf;
   np->pgdir = curproc->pgdir;
-  np->tstack = stack;
+  np->tstack = stack; //saving threads user stack
 
   //Inserting both arguments and dummy return value into stack
   void * insarg1;
@@ -567,10 +567,12 @@ int clone(void(*fcn)(void *, void *), void *arg1, void *arg2, void *stack) {
 
 //setting up stack registers
 
-np->tf->esp += PGSIZE - 3 * sizeof(void*);
-np->tf->ebp = np->tf->esp;
-np->tf->eip = (uint) fcn;
-np->tf->eax = 0;
+np->tf->esp = (uint)stack; //initialize esp to thread stack
+
+np->tf->esp += PGSIZE - 3 * sizeof(void*); //setting esp to top of stack
+np->tf->ebp = np->tf->esp; //setting base reg = to esp
+np->tf->eip = (uint) fcn; //setting inst reg to the fnc
+np->tf->eax = 0; //setting ret reg to 0 so child will return 0
   
 //rest from fork
 for(i = 0; i < NOFILE; i++)
@@ -598,6 +600,7 @@ int join(void **stack) {
   int havekids, pid;
   struct proc *curproc = myproc();
   
+  //most from wait() with adjustments for threads
   acquire(&ptable.lock);
   for(;;){
     // Scan through table looking for exited children.
@@ -614,9 +617,8 @@ int join(void **stack) {
         pid = p->pid;
         kfree(p->kstack);
         p->kstack = 0;
-        freevm(p->pgdir);
-        stack = p->tstack;
-        p->tstack = 0;
+        stack = p->tstack; //getting user stack into stack
+        p->tstack = 0;  //freeing 
         p->pid = 0;
         p->parent = 0;
         p->name[0] = 0;
