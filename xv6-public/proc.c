@@ -173,6 +173,16 @@ growproc(int n)
       return -1;
   }
   curproc->sz = sz;
+
+  //update stack size for threads
+  struct proc *threads;
+  for(threads = ptable.proc; threads < &ptable.proc[NPROC]; threads++){
+      if(threads != curproc || threads->pgdir == curproc->pgdir){
+        threads->sz = sz;
+      }
+  }
+        
+
   switchuvm(curproc);
   return 0;
 }
@@ -287,7 +297,7 @@ wait(void)
       if(p->parent != curproc || p->pgdir == p->parent->pgdir)
         continue;
       havekids = 1;
-      if(p->state == ZOMBIE){
+      if(p->state == ZOMBIE && p->hasThreads != 1){
         // Found one.
         pid = p->pid;
         kfree(p->kstack);
@@ -552,6 +562,7 @@ int clone(void(*fcn)(void *, void *), void *arg1, void *arg2, void *stack) {
   *np->tf = *curproc->tf;
   np->pgdir = curproc->pgdir;
   np->tstack = stack; //saving threads user stack
+  np->hasThreads = 1;
 
   //Inserting both arguments and dummy return value into stack
   void * insarg1;
@@ -612,12 +623,12 @@ int join(void **stack) {
         continue;
 
       havekids = 1;
-      if(p->state == ZOMBIE){
+      if(p->state == ZOMBIE && p->hasThreads == 1){
         // Found one.
+        *stack = p->tstack; //getting user stack into stack
         pid = p->pid;
         kfree(p->kstack);
         p->kstack = 0;
-        stack = p->tstack; //getting user stack into stack
         p->tstack = 0;  //freeing 
         p->pid = 0;
         p->parent = 0;

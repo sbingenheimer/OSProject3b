@@ -4,6 +4,7 @@
 #include "user.h"
 #include "x86.h"
 #include "mmu.h"
+#include "stddef.h"
 
 
 
@@ -112,6 +113,9 @@ int thread_create(void (*start_routine)(void *, void *), void *arg1, void *arg2)
   //free space that will be check for page allignment and a stack pointer that will be 
   //set after page alignment is confirmed
   void * stackspace = malloc(PGSIZE);
+  if (stackspace == NULL){
+    return -1;
+  }
   void * stack;
 
   //setting up pagealignment

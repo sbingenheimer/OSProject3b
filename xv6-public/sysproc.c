@@ -114,6 +114,10 @@ if (argptr(3, (void*)&stack, sizeof(stack)) < 0){
   return -1;
 }
 
+if (((uint)stack % PGSIZE) != 0){
+  return -1;
+}
+
 return clone((void*)fcn, (void*)arg1, (void*)arg2, (void*)stack);
   
 }

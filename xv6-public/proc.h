@@ -50,6 +50,7 @@ struct proc {
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
   void *tstack;                 // If a thread, has address of the user stack
+  int hasThreads;
 };
 
 // Process memory is laid out contiguously, low addresses first:
